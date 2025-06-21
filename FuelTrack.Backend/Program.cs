@@ -44,16 +44,21 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // ✅ Pipeline
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "FuelTrack API v1");
+    c.RoutePrefix = "swagger"; // Esto hace que Swagger esté en /swagger
+});
+
 
 app.UseHttpsRedirection();
 
 // 👇 Agrega esto para habilitar CORS
 app.UseCors();
+
+app.MapGet("/", () => "🚀 FuelTrack API está corriendo");
 
 app.MapControllers(); // 👈 Esto activa tus endpoints reales
 
