@@ -1,0 +1,22 @@
+# Etapa 1: build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+# Copiamos el archivo de proyecto
+COPY ./FuelTrack.Backend/FuelTrack.Backend.csproj ./FuelTrack.Backend/
+RUN dotnet restore ./FuelTrack.Backend/FuelTrack.Backend.csproj
+
+# Copiamos todo lo demás
+COPY . ./
+WORKDIR /src/FuelTrack.Backend
+RUN dotnet publish -c Release -o /app
+
+# Etapa 2: runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
+WORKDIR /app
+COPY --from=build /app .
+
+ENV ASPNETCORE_URLS=http://+:8080
+EXPOSE 8080
+
+ENTRYPOINT ["dotnet", "FuelTrack.Backend.dll"]
