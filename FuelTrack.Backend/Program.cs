@@ -11,55 +11,56 @@ using FuelTrack.Backend.Domain.Pricing.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Base de datos MySQL (ajusta tu cadena de conexión en appsettings.json)
+// ✅ Base de datos PostgreSQL
 builder.Services.AddDbContext<FuelTrackDbContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
-// ✅ Repositorios y Servicios de Orders
+// ✅ Repositorios y Servicios
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IClientAnalyticsService, ClientAnalyticsService>();
 builder.Services.AddScoped<IFuelPriceRepository, FuelPriceRepository>();
 builder.Services.AddScoped<FuelPriceService>();
 
-// ✅ Habilitar CORS
+// ✅ CORS
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
         policy.AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
-// ✅ Controllers y Swagger (opcional pero útil)
+// ✅ MVC + Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// ✅ Pipeline
-app.UseSwagger();
+// ✅ Migraciones automáticas al iniciar
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<FuelTrackDbContext>();
+    db.Database.Migrate(); // Aplica migraciones pendientes
+}
 
+// ✅ Middleware pipeline
+app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "FuelTrack API v1");
-    c.RoutePrefix = "swagger"; // Esto hace que Swagger esté en /swagger
+    c.RoutePrefix = "swagger"; // Visitable en /swagger
 });
 
-
 app.UseHttpsRedirection();
-
-// 👇 Agrega esto para habilitar CORS
 app.UseCors();
 
 app.MapGet("/", () => "🚀 FuelTrack API está corriendo");
-
-app.MapControllers(); // 👈 Esto activa tus endpoints reales
+app.MapControllers();
 
 app.Run();
