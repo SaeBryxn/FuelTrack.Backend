@@ -2,13 +2,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-# Copiamos el archivo de proyecto
-COPY ./FuelTrack.Backend/FuelTrack.Backend.csproj ./FuelTrack.Backend/
-RUN dotnet restore ./FuelTrack.Backend/FuelTrack.Backend.csproj
+# Copiamos el archivo .csproj primero para aprovechar la caché
+COPY FuelTrack.Backend.csproj ./
+RUN dotnet restore FuelTrack.Backend.csproj
 
-# Copiamos todo lo demás
+# Copiamos el resto del código
 COPY . ./
-WORKDIR /src/FuelTrack.Backend
 RUN dotnet publish -c Release -o /app
 
 # Etapa 2: runtime
