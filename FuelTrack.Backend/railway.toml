@@ -1,6 +1,5 @@
 [build]
-  builder = "nixpacks"
-  buildCommand = "dotnet publish FuelTrack.Backend.csproj -c Release -o out"
+builder = "docker"
 
 [start]
-  cmd = "./out/FuelTrack.Backend"
+cmd = ""
