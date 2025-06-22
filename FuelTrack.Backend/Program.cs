@@ -45,9 +45,13 @@ var app = builder.Build();
 // ✅ Migraciones automáticas al iniciar
 using (var scope = app.Services.CreateScope())
 {
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     var db = scope.ServiceProvider.GetRequiredService<FuelTrackDbContext>();
-    db.Database.Migrate(); // Aplica migraciones pendientes
+    logger.LogInformation("📦 Ejecutando migraciones en startup...");
+    db.Database.Migrate();
+    logger.LogInformation("✅ Migraciones completadas.");
 }
+
 
 // ✅ Middleware pipeline
 app.UseSwagger();
