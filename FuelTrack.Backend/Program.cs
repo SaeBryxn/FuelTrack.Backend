@@ -52,7 +52,6 @@ using (var scope = app.Services.CreateScope())
     logger.LogInformation("✅ Migraciones completadas.");
 }
 
-
 // ✅ Middleware pipeline
 app.UseSwagger();
 app.UseSwaggerUI(c =>
